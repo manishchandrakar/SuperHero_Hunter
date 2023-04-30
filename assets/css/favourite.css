@@ -1,129 +1,174 @@
-// Function to call the api to fetch data and display on home page
-function getCharacters(){
-    const char_url = `http://gateway.marvel.com/v1/public/characters?&ts=1&apikey=26cd8e7d36c0122137914a00f6b87862&hash=f7fb73edbdb6b9355a7c4c7a6a7d68b9&limit=100`
-    getCharApi(char_url)
-}
-getCharacters()
-
-// Fetching the data of all the characters to display on the home page
-async function getCharApi(char_url){
-    const res = await fetch(char_url)
-    const data = await res.json()
-    renderCharList(data.data.results) 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'math'
 }
 
-// Rendering the characters list in the homepage
-function renderCharList(data){
-    const charListUl = document.getElementById('charListUl')
-    for(let i=0;i<data.length;i++){
-        const li = document.createElement('li')
-        li.className = 'char'
-        li.innerHTML = 
-            `
-                    <div class="img">
-                        <img class="charImg" src="${data[i].thumbnail.path}.jpg" alt="">
-                    </div>
-                    <div class="details">
-                        <p class="name">${data[i].name}</p>
-                        <p class="comics">Comics: ${data[i].comics.available}</p>
-                        <p class="series">Series: ${data[i].series.available}</p>
-                    </div>
-            `
-        charListUl.append(li)
-    }
+/* Utility Classes */
+.flex{
+    display:flex;
 }
-
-// Fetching the data through Marvel API, according to the input in the searchbar and Storing it in an Array arr.
-async function getApi(api_url){
-    const res = await fetch(api_url)
-    const data = await res.json() 
-    searchListFunc(data.data.results)
+.f-c{
+    flex-direction:column;
+}
+.a-c{
+    align-items: center;
+}
+.a-s{
+    align-items:flex-start;
+}
+.j-s{
+    justify-content:flex-start;
+}
+.j-c{
+    justify-content: center;
+}
+.j-sb{
+    justify-content: space-between;
 }
 
 
-// Collecting some element in variables to handle press event
-const searchbar = document.getElementById('name')
-const ul = document.getElementById('ul')
-const searchList = document.getElementById('search-list')
-const notFound = document.getElementById('notFound')
-
-// Handling Event when user enter some input in search field
-searchbar.onkeyup = function(event){
-    let userData = event.target.value;
-    if(userData!=''){
-        while (ul.hasChildNodes()){
-            ul.firstChild.remove()
-        }
-        var api_url = `http://gateway.marvel.com/v1/public/characters?nameStartsWith=${userData}&ts=1&apikey=26cd8e7d36c0122137914a00f6b87862&hash=f7fb73edbdb6b9355a7c4c7a6a7d68b9`
-        getApi(api_url)
-    }
-    if(userData.length==0){
-        searchList.style.display = 'none'
-    }
-    else{
-        searchList.style.display =' block'
-    }
+/* Defining variables for colors */
+:root{
+    --pure:#fff;
+    --dark:#000;
+    --list-background:rgba(255, 255, 255,.5);
+    --listHover:rgba(255, 255, 255,.7);
+    --theme:rgb(255,0,0);
 }
 
-
-// Append the searchList according to the data inserted in searchbar
-function searchListFunc(data){
-        // Show and Hide Search List of Characters
-        var len = data.length
-        if(len==0){
-            notFound.style.display = 'block'
-        }else{
-            notFound.style.display = 'none'
-        }
-        // Rendering searchList
-        for(let i=0;i<len;i++){
-            const li = document.createElement('li')
-            li.className = 'flex j-sb a-c'
-            li.innerHTML = 
-                            `
-                                <a href=${"../character.html?character=" + data[i].id}git class="flex j-sb a-c" style="text-decoration:none;color:black;">
-                                    <div class="left flex a-c">
-                                        <img src="${data[i].thumbnail.path}.jpg" alt="" id="img1">
-                                        <p class="charName" id="charName1">
-                                            ${data[i].name}
-                                        </p>
-                                    </div>
-                                </a>
-                                <button class="addFav" name="${data[i].name}" id="${data[i].id}"><i class="fa-solid fa-plus addFavi"></i></button>
-                            `
-            // Appending the Character list
-            ul.append(li)
-        }
-
-        // Taking action on favourite button
-        const addFav = document.querySelectorAll('.addFav')
-        
-        // Pushing data to LocalStorage whenever clicked on the add button
-        addFav.forEach((data)=>{
-            data.addEventListener('click',function(){
-                localStorage.setItem(data.name,data.id)
-            })
-        })
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content: center;
+    align-items:center;
 }
 
-
-
-// Show Hide Characters List
-const showHideListBtn = document.getElementById('showHideList')
-const charList = document.getElementById('charList')
-function showHideCharList(){
-    var bool = true;
-    charList.style.display = 'none';    
-    showHideListBtn.addEventListener('click',function(){
-        if(bool){
-            showHideListBtn.innerHTML = 'Hide List'
-            charList.style.display = 'block'
-            bool = false;
-        }else{
-            showHideListBtn.innerHTML = 'Show List'
-            charList.style.display = 'none'
-            bool = true;
-        }
-    })
+/********* Background *********/
+.box{
+    width:100%;
+    min-height:100vh;
+    position:relative;
+    overflow: hidden;
 }
-showHideCharList()
+.box img{
+    position:absolute;
+    top:0;
+    left:0;
+    object-fit:cover;
+    z-index:9;
+}
+
+/********** Home Page Link **********/
+.favBtn{
+    position:absolute;
+    top:10%;
+    right:10%;
+    z-index:12;
+    overflow:hidden;
+}
+.favBtn a{
+    text-decoration: none;
+    color:var(--pure);
+    font-size:1.5rem;
+    letter-spacing: 1px;
+    position:relative;
+}
+.favBtn a::before{
+    content:'';
+    position:absolute;
+    width:100%;
+    height:2px;
+    background: var(--theme);
+    bottom:0;
+    left:-100%;
+    z-index:13;
+    transition:all .2s ease-in-out;
+}
+.favBtn a:hover::before{
+    left:0;
+}
+
+/* Container to display Favourite list characters */
+.container{
+    position:absolute;
+    z-index:9;
+    width:80%;
+    height:70vh;
+    
+    background:var(--list-background);
+    border-radius:.2rem;
+    overflow:hidden;
+    overflow-y:scroll;
+}
+.container::-webkit-scrollbar{
+    width:5px;
+}
+.container::-webkit-scrollbar-thumb{
+    background:var(--pure);
+    border-radius:2.5px;
+}
+.container .ul{
+    display:flex;
+    flex-wrap:wrap;
+}
+.container .ul .char{
+    width:170px;
+    height:300px;
+    margin:1rem;
+    background:var(--listHover) ;
+    border-radius:.2rem;
+    list-style:none;
+    position:relative;
+}
+
+.container .ul .char .img{
+    width:100%;
+    height:60%;
+}
+.container .ul .char .img .charImg{
+    width:100%;
+    height:100%;
+    border-radius:.2rem;
+}
+.container .ul .char .name{
+    text-align:center;
+    font-size:1rem;
+    font-weight:500;
+    margin-top:1rem;
+}
+.container .ul .char .delBtn{
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    position:absolute;
+    bottom:7%;
+    left:50%;
+    transform: translate(-50%);
+}
+.container .ul .char .delBtn i{
+    font-size:1.4rem;
+    transition:all .2s ease-in-out;
+}
+.container .ul .char .delBtn i:hover{
+    color:var(--theme);
+    font-size:2rem;
+
+}
+
+/* If no fav character found */
+.noFavChar{
+    position:absolute;
+    z-index:10;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    display:none;
+}
+.noFavChar .desc{
+    font-size:2rem;
+    text-align:center;
+    font-weight:600;
+    color:var(--dark);
+}
